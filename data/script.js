@@ -1,8 +1,8 @@
 // ==================== WEBSOCKET ====================
 var gateway = `ws://${window.location.hostname}/ws`;
 var websocket;
-// var gaugeTemp;
-// var gaugeHumi;
+var gaugeTemp = null;
+var gaugeHumi = null;
 
 window.addEventListener('load', onLoad);
 
@@ -46,11 +46,8 @@ function onMessage(event) {
 
         // 1. Xử lý dữ liệu Sensor (Task 3)
         if (page === "home" && value) {
-            gaugeTemp.refresh(value.temp);
-            gaugeHumi.refresh(value.humi);
-
-            var temp = value.temp
-            var humi = value.humi;
+            const temp = value.temp;
+            const humi = value.humi;
 
             if (gaugeTemp) gaugeTemp.refresh(temp);
             if (gaugeHumi) gaugeHumi.refresh(humi);
@@ -100,11 +97,13 @@ function showSection(id, event) {
 
 // ==================== HOME GAUGES ====================
 window.onload = function () {
-    const gaugeTemp = new JustGage({
+    gaugeTemp = new JustGage({
         id: "gauge_temp",
-        value: 26,
+        value: 0,
         min: -10,
         max: 50,
+        title: "Nhiệt độ",
+        label: "°C",
         donut: true,
         pointer: false,
         gaugeWidthScale: 0.25,
@@ -113,11 +112,13 @@ window.onload = function () {
         levelColors: ["#00BCD4", "#4CAF50", "#FFC107", "#F44336"]
     });
 
-    const gaugeHumi = new JustGage({
+    gaugeHumi = new JustGage({
         id: "gauge_humi",
-        value: 60,
+        value: 0,
         min: 0,
         max: 100,
+        title: "Độ ẩm",
+        label: "%",
         donut: true,
         pointer: false,
         gaugeWidthScale: 0.25,
@@ -269,20 +270,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (switchInput) {
         switchInput.addEventListener('change', toggleTheme);
     }
+
     // === XỬ LÝ LED 1 (BLINKY) ===
     const led1Switch = document.getElementById('led1Switch');
     const led1Label = document.getElementById('led1StatusLabel');
-    // GPIO CỦA LED 1 (Phải khớp với LED_GPIO trong led_blinky.cpp)
     const LED1_GPIO = 48; 
 
     if (led1Switch) {
+        led1Switch.checked = true;
+        led1Label.innerText = "AUTO (RUNNING)";
+
         led1Switch.addEventListener('change', function() {
             const isManualOn = this.checked;
             
-            // Cập nhật nhãn
-            led1Label.innerText = isManualOn ? "MANUAL ON" : "OFF/AUTO";
-            
-            // Gửi lệnh WebSocket
+            led1Label.innerText = isManualOn ? "AUTO" : "OFF";
+
             const cmd = {
                 page: "device",
                 value: {
@@ -292,22 +294,22 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             Send_Data(JSON.stringify(cmd));
         });
-    }
-    // === XỬ LÝ NEOPIXEL (AUTO/MANUAL) ===
+    } 
+
+    // === XỬ LÝ NEOPIXEL ===
     const neoSwitch = document.getElementById('neoModeSwitch');
     const neoLabel = document.getElementById('neoModeLabel');
     const NEO_GPIO = 45; 
 
     if (neoSwitch) {
+        neoSwitch.checked = true;
+        neoLabel.innerText = "AUTO (COLOR)";
+
         neoSwitch.addEventListener('change', function() {
             const isManualMode = this.checked;
 
-            // Cập nhật nhãn
-            neoLabel.innerText = isManualMode ? "MANUAL (WHITE)" : "AUTO (HUMIDITY)";
+            neoLabel.innerText = isManualMode ? "AUTO" : "OFF";
             
-            // Gửi lệnh WebSocket
-            // ON = Bật chế độ Manual (Sáng trắng)
-            // OFF = Tắt chế độ Manual (Về Auto)
             const cmd = {
                 page: "device",
                 value: {

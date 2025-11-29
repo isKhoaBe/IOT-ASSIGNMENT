@@ -66,7 +66,7 @@ void setup()
   // Create RTOS tasks with priorities
   Serial.println("[INIT] Creating RTOS tasks...");
 
-  xTaskCreate(Device_Control_Task, "DeviceCtrl", 2048, NULL, 3, NULL);
+  xTaskCreate(Device_Control_Task, "DeviceCtrl", 8192, NULL, 3, NULL);
   // Task 1: LED Blink with Temperature Control
   xTaskCreate(led_blinky,
               "LED_Temp",

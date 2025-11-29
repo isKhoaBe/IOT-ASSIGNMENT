@@ -5,6 +5,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/semphr.h"
+#include <vector>
 
 // Shared data structure for sensor readings
 typedef struct
@@ -27,6 +28,8 @@ typedef struct
 
     boolean led1Override;
     boolean neoOverride;
+    boolean relayOverride;
+
     SemaphoreHandle_t xBinarySemaphoreInternet;
     SemaphoreHandle_t mutex; // Mutex for protecting WiFi data
 } WifiConfig_t;
@@ -34,6 +37,7 @@ typedef struct
 // Global pointer to shared sensor data (initialized in setup)
 extern SensorData_t *g_sensorData;
 extern WifiConfig_t *g_wifiConfig;
+extern std::vector<int> g_userPins;
 
 // Helper functions to safely access shared data
 void initSharedData();

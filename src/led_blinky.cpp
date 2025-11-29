@@ -2,6 +2,7 @@
 #include "task_webserver.h"
 #include "neo_blinky.h"
 #include <ArduinoJson.h>
+Adafruit_NeoPixel strip(LED_COUNT, NEO_PIN, NEO_GRB + NEO_KHZ800);
 
 /**
  * Task 1: Single LED Blink with Temperature Conditions
@@ -13,6 +14,14 @@
  *
  * Uses semaphore-protected shared data access to read temperature values
  */
+
+bool isValidOutputPin(int gpio) {
+    const int forbidden[] = {0,2,3,19,20,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,46}; 
+    for (int f : forbidden) if (gpio == f) return false;
+
+    if (gpio < 0 || gpio > 49) return false;
+    return true;
+}
 
 void led_blinky(void *pvParameters)
 {
@@ -33,9 +42,6 @@ void led_blinky(void *pvParameters)
 
     while (1)
     {
-        // Override check: If manual override is enabled, skip automatic blinking
-        Serial.print("DEBUG: Task Blinky đang chạy trên GPIO: ");
-        Serial.println(LED_GPIO);
         bool override = false;
         if (xSemaphoreTake(g_wifiConfig->mutex, pdMS_TO_TICKS(50)) == pdTRUE)
         {
@@ -87,7 +93,6 @@ void led_blinky(void *pvParameters)
 
 void Device_Control_Task(void *pvParameters)
 {
-    Adafruit_NeoPixel strip(LED_COUNT, NEO_PIN, NEO_GRB + NEO_KHZ800);
     strip.begin();
     strip.show();
     pinMode(LED_GPIO, OUTPUT);
@@ -99,57 +104,79 @@ void Device_Control_Task(void *pvParameters)
         if (xQueueReceive(xQueueRelayControl, &cmd, portMAX_DELAY) == pdPASS)
         {
             int pin = cmd.gpioPin;
-            bool state = cmd.newState;
+            bool isWebOn = cmd.newState;
 
             if (pin == LED_GPIO)
             {
                 if (g_wifiConfig != NULL && xSemaphoreTake(g_wifiConfig->mutex, pdMS_TO_TICKS(100)) == pdTRUE)
                 {
-                    g_wifiConfig->led1Override = true;
+                    g_wifiConfig->led1Override = !isWebOn;
                     xSemaphoreGive(g_wifiConfig->mutex);
                 }
-
-                digitalWrite(LED_GPIO, state ? HIGH : LOW);
-                Serial.printf("✅ LED 1 (Override) set to %s\n", state ? "ON" : "OFF");
+                if (!isWebOn)
+                {
+                    digitalWrite(LED_GPIO, LOW); // OFF
+                    Serial.println("✅ LED1 (Override) set to OFF");
+                }
+                else
+                {
+                    Serial.println("✅ LED1 back to AUTO");
+                }
             }
 
             else if (pin == NEO_PIN)
             {
                 if (g_wifiConfig != NULL && xSemaphoreTake(g_wifiConfig->mutex, pdMS_TO_TICKS(100)) == pdTRUE)
                 {
-                    g_wifiConfig->neoOverride = true;
+                    g_wifiConfig->neoOverride = !isWebOn;
                     xSemaphoreGive(g_wifiConfig->mutex);
                 }
 
-                if (state)
+                if (!isWebOn)
                 {
-                    strip.setPixelColor(0, strip.Color(255, 255, 255)); // ON (Màu trắng)
-                    Serial.println("✅ NeoPixel (Override) set to ON");
+                    strip.setPixelColor(0, strip.Color(0, 0, 0)); 
+                    strip.show();
+                    Serial.println("✅ NeoPixel Force OFF");
                 }
                 else
                 {
-                    strip.setPixelColor(0, strip.Color(0, 0, 0)); // OFF
-                    Serial.println("✅ NeoPixel (Override) set to OFF");
+                    Serial.println("✅ NeoPixel Back to AUTO");
                 }
-                strip.show();
             }
             else
             {
-                pinMode(pin, OUTPUT);
-                digitalWrite(pin, state ? HIGH : LOW);
-                Serial.printf("✅ Generic Relay (GPIO %d) set to %s\n", pin, state ? "ON" : "OFF");
+                if (!isValidOutputPin(pin)) {
+                    Serial.printf("⚠️ Invalid GPIO %d received - ignoring\n", pin);
+                } else {
+                    bool alreadyConfigured = false;
+                    for (int p : g_userPins) {
+                        if (p == pin) {
+                            alreadyConfigured = true; break;
+                        }
+                    }
+                        if (!alreadyConfigured) {
+                            pinMode(pin, OUTPUT);
+                            digitalWrite(pin, LOW); // default safe state
+                            g_userPins.push_back(pin);
+                            Serial.printf("ℹ️ Configured GPIO %d as OUTPUT and saved to userPins\n", pin);
+                        }
+                if (g_wifiConfig != NULL && xSemaphoreTake(g_wifiConfig->mutex, pdMS_TO_TICKS(100)) == pdTRUE)
+                {
+                    g_wifiConfig->relayOverride = isWebOn;
+                    xSemaphoreGive(g_wifiConfig->mutex);
+                }
+                digitalWrite(pin, isWebOn ? HIGH : LOW);
+                Serial.printf("✅ External Relay (GPIO %d) set to %s\n", pin, isWebOn ? "ON" : "OFF");
             }
+        }
 
-            // --- GỬI PHẢN HỒI VỀ WEB (Để cập nhật giao diện) ---
             StaticJsonDocument<256> jsonDoc;
             jsonDoc["page"] = "device_update";
             jsonDoc["value"]["gpio"] = pin;
-            jsonDoc["value"]["status"] = state ? "ON" : "OFF";
+            jsonDoc["value"]["status"] = isWebOn ? "ON" : "OFF";
 
             String jsonString;
             serializeJson(jsonDoc, jsonString);
-
-            // Gọi hàm gửi WebSocket (được khai báo trong task_webserver.h)
             Webserver_sendata(jsonString);
         }
     }
