@@ -113,12 +113,32 @@ void setup()
               NULL,
               1, // Priority 1 (lower priority)
               NULL);
+
+  xTaskCreate(Task_Toogle_BOOT,
+              "Task_BOOT",
+              2048,
+              NULL,
+              5,
+              NULL);
+
   Serial.println("[INIT] - CoreIOT Task created");
 
   Serial.println("========================================");
   Serial.println("All tasks created successfully!");
   Serial.println("System running...");
   Serial.println("========================================\n");
+
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+            { request->send(LittleFS, "/index.html", "text/html"); });
+
+  server.on("/styles.css", HTTP_GET, [](AsyncWebServerRequest *request)
+            { request->send(LittleFS, "/styles.css", "text/css"); });
+
+  server.on("/script.js", HTTP_GET, [](AsyncWebServerRequest *request)
+            { request->send(LittleFS, "/script.js", "application/javascript"); });
+
+  server.serveStatic("/", LittleFS, "/");
+  server.begin();
 }
 
 void loop()

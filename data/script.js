@@ -46,8 +46,8 @@ function onMessage(event) {
 
         // 1. Xử lý dữ liệu Sensor (Task 3)
         if (page === "home" && value) {
-            const temp = value.temp;
-            const humi = value.humi;
+            const temp = parseFloat(value.temp).toFixed(1); 
+            const humi = parseFloat(value.humi).toFixed(1);
 
             if (gaugeTemp) gaugeTemp.refresh(temp);
             if (gaugeHumi) gaugeHumi.refresh(humi);
@@ -104,10 +104,11 @@ window.onload = function () {
         max: 50,
         title: "Nhiệt độ",
         label: "°C",
+        decimals: 1,
         donut: true,
         pointer: false,
-        gaugeWidthScale: 0.25,
-        gaugeColor: "transparent",
+        gaugeWidthScale: 0.5,
+        gaugeColor: "#edebeb",
         levelColorsGradient: true,
         levelColors: ["#00BCD4", "#4CAF50", "#FFC107", "#F44336"]
     });
@@ -119,28 +120,24 @@ window.onload = function () {
         max: 100,
         title: "Độ ẩm",
         label: "%",
+        decimals: 1,
         donut: true,
         pointer: false,
-        gaugeWidthScale: 0.25,
-        gaugeColor: "transparent",
+        gaugeWidthScale: 0.5,
+        gaugeColor: "#edebeb",
         levelColorsGradient: true,
         levelColors: ["#42A5F5", "#00BCD4", "#0288D1"]
     });
-    // --- Hàm cập nhật màu chữ trong gauge ---
     function updateGaugeTextColor() {
         const textColor = getComputedStyle(document.documentElement)
             .getPropertyValue('--text-color')
             .trim();
 
-        // chọn text SVG bên trong gauge và đổi fill
         document.querySelectorAll('#gauge_temp text, #gauge_humi text')
             .forEach(el => el.setAttribute('fill', textColor));
     }
 
-    // cập nhật màu ban đầu
     updateGaugeTextColor();
-
-    // --- lưu hàm để dùng lại trong toggleTheme ---
     window.updateGaugeTextColor = updateGaugeTextColor;
 };
 
@@ -278,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (led1Switch) {
         led1Switch.checked = true;
-        led1Label.innerText = "AUTO (RUNNING)";
+        led1Label.innerText = "AUTO";
 
         led1Switch.addEventListener('change', function() {
             const isManualOn = this.checked;
@@ -303,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (neoSwitch) {
         neoSwitch.checked = true;
-        neoLabel.innerText = "AUTO (COLOR)";
+        neoLabel.innerText = "AUTO";
 
         neoSwitch.addEventListener('change', function() {
             const isManualMode = this.checked;
