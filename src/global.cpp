@@ -1,20 +1,16 @@
 #include "global.h"
 #include <vector>
 
-// Statically allocated shared data structures (safer than dynamic allocation)
 static SensorData_t sensorDataInstance;
 static WifiConfig_t wifiConfigInstance;
 
-// Global pointers to shared data structures
 SensorData_t *g_sensorData = NULL;
 WifiConfig_t *g_wifiConfig = NULL;
 
 std::vector<int> g_userPins;
 
-// Initialize shared data structures
 void initSharedData()
 {
-    // Initialize sensor data structure
     g_sensorData = &sensorDataInstance;
     g_sensorData->temperature = 25.0; // Default safe value
     g_sensorData->humidity = 50.0;    // Default safe value
@@ -36,10 +32,10 @@ void initSharedData()
     g_wifiConfig->webserver_isrunning = false; // Initialize webserver state
     g_wifiConfig->xBinarySemaphoreInternet = xSemaphoreCreateBinary();
     g_wifiConfig->mutex = xSemaphoreCreateMutex();
-    
+
     g_wifiConfig->led1Override = false;
     g_wifiConfig->neoOverride = false;
-    g_wifiConfig->relayOverride = false; 
+    g_wifiConfig->relayOverride = false;
 
     if (g_wifiConfig->mutex == NULL || g_wifiConfig->xBinarySemaphoreInternet == NULL)
     {
@@ -93,7 +89,6 @@ void getSensorData(float *temp, float *humi)
     else
     {
         Serial.println("[ERROR] Sensor data structure not initialized!");
-        // Return default values
         *temp = 25.0;
         *humi = 50.0;
     }

@@ -9,7 +9,7 @@ void Webserver_sendata(String data)
 {
     if (ws.count() > 0)
     {
-        ws.textAll(data); // Gửi đến tất cả client đang kết nối
+        ws.textAll(data);
         Serial.println("📤 Đã gửi dữ liệu qua WebSocket: " + data);
     }
     else
@@ -71,7 +71,6 @@ void Webserver_stop()
     ws.closeAll();
     server.end();
 
-    // Set webserver stopped state with mutex protection
     if (g_wifiConfig != NULL && g_wifiConfig->mutex != NULL)
     {
         if (xSemaphoreTake(g_wifiConfig->mutex, pdMS_TO_TICKS(100)) == pdTRUE)
@@ -85,7 +84,6 @@ void Webserver_stop()
 
 void Webserver_reconnect()
 {
-    // Check webserver state with mutex protection
     bool isRunning = false;
     if (g_wifiConfig != NULL && g_wifiConfig->mutex != NULL)
     {
@@ -105,7 +103,7 @@ void Webserver_reconnect()
 
 void handleWebSocketMessage(String message)
 {
-    Serial.println("📥 WS Received: " + message);
+    // Serial.println("📥 WS Received: " + message);
 
     StaticJsonDocument<512> doc;
     DeserializationError error = deserializeJson(doc, message);
