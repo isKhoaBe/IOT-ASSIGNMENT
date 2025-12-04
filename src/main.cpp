@@ -54,7 +54,7 @@ void setup()
       ssid = g_wifiConfig->WIFI_SSID;
       xSemaphoreGive(g_wifiConfig->mutex);
     }
-    
+
     if (!ssid.isEmpty())
     {
       Serial.println("[INIT] WiFi credentials found, initializing WiFi...");
@@ -135,6 +135,21 @@ void setup()
 
   // Note: Server initialization is handled by Webserver_RTOS_Task
   // Do NOT call server.begin() here to avoid double initialization
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+            { request->send(LittleFS, "/index.html", "text/html"); });
+
+  // Route cho style.css
+  server.on("/styles.css", HTTP_GET, [](AsyncWebServerRequest *request)
+            { request->send(LittleFS, "/styles.css", "text/css"); });
+
+  // Route cho script.js
+  server.on("/script.js", HTTP_GET, [](AsyncWebServerRequest *request)
+            { request->send(LittleFS, "/script.js", "application/javascript"); });
+
+  server.serveStatic("/", LittleFS, "/");
+
+  // ... Các cấu hình websocket khác ...
+  server.begin();
 }
 
 void loop()

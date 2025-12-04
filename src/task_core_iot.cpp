@@ -29,24 +29,6 @@ void processSharedAttributes(const Shared_Attribute_Data &data)
 {
     for (auto it = data.begin(); it != data.end(); ++it)
     {
-        // if (strcmp(it->key().c_str(), BLINKING_INTERVAL_ATTR) == 0)
-        // {
-        //     const uint16_t new_interval = it->value().as<uint16_t>();
-        //     if (new_interval >= BLINKING_INTERVAL_MS_MIN && new_interval <= BLINKING_INTERVAL_MS_MAX)
-        //     {
-        //         blinkingInterval = new_interval;
-        //         Serial.print("Blinking interval is set to: ");
-        //         Y
-        //             Serial.println(new_interval);
-        //     }
-        // }
-        // if (strcmp(it->key().c_str(), LED_STATE_ATTR) == 0)
-        // {
-        //     ledState = it->value().as<bool>();
-        // digitalWrite(LED_PIN, ledState);
-        // Serial.print("LED state is set to: ");
-        // Serial.println(ledState);
-        // }
     }
 }
 
@@ -57,23 +39,27 @@ RPC_Response setValueLED_GPIO(const RPC_Data &data)
     bool newState = data;
     Serial.print("LED state change to: ");
     Serial.println(newState ? "ON" : "OFF");
-    
+
     // Send command to Device Control Task via queue
     DeviceControlCommand cmd;
     cmd.gpioPin = LED_GPIO;
     cmd.newState = newState;
-    
-    if (xQueueRelayControl != NULL) {
-        if (xQueueSend(xQueueRelayControl, &cmd, pdMS_TO_TICKS(100)) == pdPASS) {
+
+    if (xQueueRelayControl != NULL)
+    {
+        if (xQueueSend(xQueueRelayControl, &cmd, pdMS_TO_TICKS(100)) == pdPASS)
+        {
             Serial.println("LED control command sent to queue");
-        } else {
+        }
+        else
+        {
             Serial.println("Failed to send LED control command");
         }
     }
-    
+
     // Update LED state
     ledState = newState;
-    
+
     return RPC_Response("setValueLED_GPIO", newState);
 }
 
@@ -83,7 +69,7 @@ RPC_Response getValueLED_GPIO(const RPC_Data &data)
     Serial.println("Received RPC: getValueLED_GPIO");
     Serial.print("Current LED state: ");
     Serial.println(ledState ? "ON" : "OFF");
-    
+
     return RPC_Response("getValueLED_GPIO", ledState);
 }
 
@@ -94,20 +80,24 @@ RPC_Response setValueNEO_GPIO(const RPC_Data &data)
     bool newState = data;
     Serial.print("NEO state change to: ");
     Serial.println(newState ? "ON" : "OFF");
-    
+
     // Send command to Device Control Task via queue
     DeviceControlCommand cmd;
     cmd.gpioPin = NEO_PIN;
     cmd.newState = newState;
-    
-    if (xQueueRelayControl != NULL) {
-        if (xQueueSend(xQueueRelayControl, &cmd, pdMS_TO_TICKS(100)) == pdPASS) {
+
+    if (xQueueRelayControl != NULL)
+    {
+        if (xQueueSend(xQueueRelayControl, &cmd, pdMS_TO_TICKS(100)) == pdPASS)
+        {
             Serial.println("NEO control command sent to queue");
-        } else {
+        }
+        else
+        {
             Serial.println("Failed to send NEO control command");
         }
     }
-    
+
     return RPC_Response("setValueNEO_GPIO", newState);
 }
 
@@ -117,15 +107,17 @@ RPC_Response getValueNEO_GPIO(const RPC_Data &data)
     Serial.println("Received RPC: getValueNEO_GPIO");
     // Return current override state (inverted: ON means AUTO, OFF means forced OFF)
     bool neoState = false;
-    if (g_wifiConfig != NULL && g_wifiConfig->mutex != NULL) {
-        if (xSemaphoreTake(g_wifiConfig->mutex, pdMS_TO_TICKS(100)) == pdTRUE) {
+    if (g_wifiConfig != NULL && g_wifiConfig->mutex != NULL)
+    {
+        if (xSemaphoreTake(g_wifiConfig->mutex, pdMS_TO_TICKS(100)) == pdTRUE)
+        {
             neoState = !g_wifiConfig->neoOverride; // Invert because ON=AUTO, OFF=forced off
             xSemaphoreGive(g_wifiConfig->mutex);
         }
     }
     Serial.print("Current NEO state: ");
     Serial.println(neoState ? "ON (AUTO)" : "OFF");
-    
+
     return RPC_Response("getValueNEO_GPIO", neoState);
 }
 
@@ -163,16 +155,18 @@ void CORE_IOT_reconnect()
         String server = "";
         String token = "";
         String port = "";
-        
-        if (g_wifiConfig != NULL && g_wifiConfig->mutex != NULL) {
-            if (xSemaphoreTake(g_wifiConfig->mutex, portMAX_DELAY) == pdTRUE) {
+
+        if (g_wifiConfig != NULL && g_wifiConfig->mutex != NULL)
+        {
+            if (xSemaphoreTake(g_wifiConfig->mutex, portMAX_DELAY) == pdTRUE)
+            {
                 server = g_wifiConfig->CORE_IOT_SERVER;
                 token = g_wifiConfig->CORE_IOT_TOKEN;
                 port = g_wifiConfig->CORE_IOT_PORT;
                 xSemaphoreGive(g_wifiConfig->mutex);
             }
         }
-        
+
         if (!tb.connect(server.c_str(), token.c_str(), port.toInt()))
         {
             // Serial.println("Failed to connect");

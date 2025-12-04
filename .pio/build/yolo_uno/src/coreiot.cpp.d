@@ -201,4 +201,26 @@
  C:/Users/Lenovo/.platformio/packages/framework-arduinoespressif32/cores/esp32/cbuf.h \
  include/global.h lib/PubSubClient/PubSubClient.h \
  lib/ArduinoJson/src/ArduinoJson.h lib/ArduinoJson/src/ArduinoJson.hpp \
- lib/ArduinoJson/src/ArduinoJson/Configuration.hpp
+ lib/ArduinoJson/src/ArduinoJson/Configuration.hpp include/led_blinky.h \
+ include/neo_blinky.h \
+ .pio/libdeps/yolo_uno/Adafruit\ NeoPixel/Adafruit_NeoPixel.h \
+ include/task_webserver.h \
+ .pio/libdeps/yolo_uno/ESPAsyncWebServer@src-8a740033305cb1c99d89b522d725653f/src/ESPAsyncWebServer.h \
+ C:/Users/Lenovo/.platformio/packages/framework-arduinoespressif32/libraries/FS/src/FS.h \
+ .pio/libdeps/yolo_uno/AsyncTCP/src/AsyncTCP.h \
+ .pio/libdeps/yolo_uno/AsyncTCP/src/AsyncTCPVersion.h \
+ C:/Users/Lenovo/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/lwip/lwip/src/include/lwip/pbuf.h \
+ .pio/libdeps/yolo_uno/ESPAsyncWebServer@src-8a740033305cb1c99d89b522d725653f/src/literals.h \
+ .pio/libdeps/yolo_uno/ESPAsyncWebServer@src-8a740033305cb1c99d89b522d725653f/src/AsyncEventSource.h \
+ .pio/libdeps/yolo_uno/ESPAsyncWebServer@src-8a740033305cb1c99d89b522d725653f/src/AsyncWebSocket.h \
+ .pio/libdeps/yolo_uno/ESPAsyncWebServer@src-8a740033305cb1c99d89b522d725653f/src/WebHandlerImpl.h \
+ .pio/libdeps/yolo_uno/ESPAsyncWebServer@src-8a740033305cb1c99d89b522d725653f/src/WebResponseImpl.h \
+ C:/Users/Lenovo/.platformio/packages/framework-arduinoespressif32/cores/esp32/StreamString.h \
+ C:/Users/Lenovo/.platformio/packages/framework-arduinoespressif32/libraries/LittleFS/src/LittleFS.h \
+ lib/ElegantOTA-master/src/ElegantOTA.h \
+ C:/Users/Lenovo/.platformio/packages/framework-arduinoespressif32/cores/esp32/stdlib_noniso.h \
+ lib/ElegantOTA-master/src/elop.h \
+ C:/Users/Lenovo/.platformio/packages/framework-arduinoespressif32/libraries/Update/src/Update.h \
+ C:/Users/Lenovo/.platformio/packages/framework-arduinoespressif32/cores/esp32/MD5Builder.h \
+ C:/Users/Lenovo/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/esp_rom/include/esp_rom_md5.h \
+ include/task_handler.h include/task_check_info.h include/task_wifi.h
